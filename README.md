@@ -36,3 +36,42 @@ Dataset link: [Bangla LPDB-A](https://zenodo.org/records/4718238)
 | Confusion Matrix | F1 Curve | Validation-Labels | Validation-Predictions |
 |:----------------:|:--------:|:----------------:|:---------------:|
 | ![Confusion Matrix](assets/ocr/conf.png) | ![F1](assets/ocr/f1.png) | ![Validation-Labels](assets/ocr/val_batch2_labels.jpg) | ![Validation-Predictions ](assets/ocr/val_batch2_pred.jpg) |
+
+
+# Project Structure 
+Folders:
+model-m-detection : YoloV8-m model for detection.
+model-m-ocr : YoloV8-m model for OCR
+
+same goes for the models.
+
+sample-images/videos for demonstration 
+
+.ipynb files are pretty much self explanatory.
+
+dataset-process-detection/ocr.ipynb files for transforming the raw dataset into Yolo specific folder structure.
+
+
+model-training.ipynb : Training for YoloV8-n/s/m
+
+
+detection/ocr-inference.ipynb : Doing inference on sample-images.
+
+real-time-inference.ipynb : Inference on recorded video file .mp4 .
+
+
+
+
+## Citation
+
+@dataset{ataher_sams_2021_4718238,
+  author       = {Ataher Sams and
+                  Homaira Huda Shomee},
+  title        = {Bangla LPDB - A},
+  month        = apr,
+  year         = 2021,
+  publisher    = {Zenodo},
+  version      = {v1},
+  doi          = {10.5281/zenodo.4718238},
+  url          = {https://doi.org/10.5281/zenodo.4718238},
+}
