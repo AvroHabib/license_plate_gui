@@ -6,7 +6,10 @@ Full YOLO based Bangladeshi Vehicle License Plate Recognition.
 [![Watch the video demonstration](https://img.youtube.com/vi/5TKTgeAjTs4/0.jpg)](https://www.youtube.com/watch?v=5TKTgeAjTs4)
 
 
-![GIF](assets/v1.gif)
+<figure>
+  <img src="assets/v1.gif" alt="License Plate Detection Demo">
+  <figcaption>Real-time Bengali license plate detection and recognition in action</figcaption>
+</figure>
 ## Overview
 
 This project aims to achieve real-time license plate detection and is designed for implementation on NVIDIA Jetson platforms. 
