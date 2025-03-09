@@ -9,7 +9,7 @@ Full YOLO based Bangladeshi Vehicle License Plate Recognition.
 <p align="center">
   <img src="assets/v1.gif" alt="License Plate Detection Demo">
   <br>
-  <em>Real-time Bengali license plate detection and recognition in action</em>
+  <em>demo.gif</em>
 </p>
 
 
