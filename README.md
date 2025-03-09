@@ -29,4 +29,4 @@ Dataset link: [Bangla LPDB-A](https://zenodo.org/records/4718238)
 
 | Confusion Matrix | F1 Curve | Validation-Labels | Validation-Predictions |
 |:----------------:|:--------:|:----------------:|:---------------:|
-| ![Confusion Matrix](assets/detection/conf.png) | ![F1](assets/detection/f1.png) | ![Validation-Labels](assets/detection/val_batch2_labels.png) | ![Validation-Predictions ](assets/detection/val_batch2_pred) |
+| ![Confusion Matrix](assets/detection/conf.png) | ![F1](assets/detection/f1.png) | ![Validation-Labels](assets/detection/val_batch2_labels.jpg) | ![Validation-Predictions ](assets/detection/val_batch2_jpg) |
