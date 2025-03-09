@@ -3,7 +3,9 @@ Full YOLO based Bangladeshi Vehicle License Plate Recognition.
 
 
 ## Demo
-[![Watch the demo on YouTube](https://img.youtube.com/vi/5TKTgeAjTs4/0.jpg)](https://www.youtube.com/watch?v=5TKTgeAjTs4)
+[![Watch the video demonstration](https://img.youtube.com/vi/5TKTgeAjTs4/0.jpg)](https://www.youtube.com/watch?v=5TKTgeAjTs4)
+
+
 ![Real Time Demo](assets/v1.gif)
 ## Overview
 
