@@ -26,7 +26,13 @@ Dataset link: [Bangla LPDB-A](https://zenodo.org/records/4718238)
 
 
 ## Training and Validation
-
+### Detection Model
 | Confusion Matrix | F1 Curve | Validation-Labels | Validation-Predictions |
 |:----------------:|:--------:|:----------------:|:---------------:|
-| ![Confusion Matrix](assets/detection/conf.png) | ![F1](assets/detection/f1.png) | ![Validation-Labels](assets/detection/val_batch2_labels.jpg) | ![Validation-Predictions ](assets/detection/val_batch2_jpg) |
+| ![Confusion Matrix](assets/detection/conf.png) | ![F1](assets/detection/f1.png) | ![Validation-Labels](assets/detection/val_batch2_labels.jpg) | ![Validation-Predictions ](assets/detection/val_batch2_pred.jpg) |
+
+
+### OCR Model
+| Confusion Matrix | F1 Curve | Validation-Labels | Validation-Predictions |
+|:----------------:|:--------:|:----------------:|:---------------:|
+| ![Confusion Matrix](assets/ocr/conf.png) | ![F1](assets/ocr/f1.png) | ![Validation-Labels](assets/ocr/val_batch2_labels.jpg) | ![Validation-Predictions ](assets/ocr/val_batch2_pred.jpg) |
