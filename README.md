@@ -21,3 +21,12 @@ Each image also contains its corresponding annotated text file in YOLO format. F
 
 
 Dataset link: [Bangla LPDB-A](https://zenodo.org/records/4718238)
+
+
+
+
+## Training and Validation
+
+| Confusion Matrix | F1 Curve | Validation-Labels | Validation-Predictions |
+|:----------------:|:--------:|:----------------:|:---------------:|
+| ![Confusion Matrix](assets/detection/conf.png) | ![F1](assets/detection/f1.png) | ![Validation-Labels](assets/detection/val_batch2_labels.png) | ![Validation-Predictions ](assets/detection/val_batch2_pred) |
