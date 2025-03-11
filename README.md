@@ -50,12 +50,12 @@ Dataset link: [Bangla LPDB-A](https://zenodo.org/records/4718238)
 | ![Confusion Matrix](assets/ocr/conf.png) | ![F1](assets/ocr/f1.png) | ![Validation-Labels](assets/ocr/val_batch2_labels.jpg) | ![Validation-Predictions ](assets/ocr/val_batch2_pred.jpg) |
 
 
-# Project Structure 
+## Project Structure 
 Folders:<br>
 model-m-detection : YoloV8-m model for detection.<br>
 model-m-ocr : YoloV8-m model for OCR<br>
 
-same goes for the models.<br>
+same goes for all the models.<br>
 
 sample-images/videos for demonstration<br> 
 
