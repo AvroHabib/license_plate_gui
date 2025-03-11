@@ -51,23 +51,23 @@ Dataset link: [Bangla LPDB-A](https://zenodo.org/records/4718238)
 
 
 # Project Structure 
-Folders:
-model-m-detection : YoloV8-m model for detection.
-model-m-ocr : YoloV8-m model for OCR
+Folders:<br>
+model-m-detection : YoloV8-m model for detection.<br>
+model-m-ocr : YoloV8-m model for OCR<br>
 
-same goes for the models.
+same goes for the models.<br>
 
-sample-images/videos for demonstration 
+sample-images/videos for demonstration<br> 
 
-.ipynb files are pretty much self explanatory.
+.ipynb files are pretty much self explanatory.<br>
 
-dataset-process-detection/ocr.ipynb files for transforming the raw dataset into Yolo specific folder structure.
-
-
-model-training.ipynb : Training for YoloV8-n/s/m
+dataset-process-detection/ocr.ipynb files for transforming the raw dataset into Yolo specific folder structure.<br>
 
 
-detection/ocr-inference.ipynb : Doing inference on sample-images.
+model-training.ipynb : Training for YoloV8-n/s/m<br>
+
+
+detection/ocr-inference.ipynb : Doing inference on sample-images.<br>
 
 real-time-inference.ipynb : Inference on recorded video file .mp4 .
 
