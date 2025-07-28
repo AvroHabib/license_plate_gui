@@ -1,0 +1,14 @@
+# Additional requirements for the GUI application
+# Install these in addition to the existing requirements.txt
+
+# GUI Framework (usually comes with Python, but just in case)
+tkinter
+
+# Image processing for GUI
+Pillow==11.1.0
+
+# Already in main requirements.txt but listing key ones:
+# opencv-python==4.11.0.86
+# ultralytics==8.3.70
+# torch==2.6.0
+# numpy==2.1.1
