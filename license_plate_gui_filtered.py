@@ -22,7 +22,23 @@ class LicensePlateGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Bengali License Plate Recognition System with Filter")
-        self.root.geometry("1400x800")
+        
+        # Make window responsive to screen size
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        
+        # Set minimum size and calculate optimal size
+        min_width, min_height = 1000, 600
+        optimal_width = min(1400, int(screen_width * 0.9))
+        optimal_height = min(800, int(screen_height * 0.9))
+        
+        self.root.geometry(f"{optimal_width}x{optimal_height}")
+        self.root.minsize(min_width, min_height)
+        
+        # Center the window on screen
+        x = (screen_width - optimal_width) // 2
+        y = (screen_height - optimal_height) // 2
+        self.root.geometry(f"{optimal_width}x{optimal_height}+{x}+{y}")
         
         # Initialize variables
         self.cap = None
@@ -88,17 +104,24 @@ class LicensePlateGUI:
         self.load_models()
         
     def create_widgets(self):
-        # Main container
+        # Main container with responsive layout
         main_frame = ttk.Frame(self.root)
         main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
-        # Left side - Video display
-        left_frame = ttk.Frame(main_frame)
-        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+        # Create main paned window for resizable panels
+        main_paned = ttk.PanedWindow(main_frame, orient=tk.HORIZONTAL)
+        main_paned.pack(fill=tk.BOTH, expand=True)
         
-        # Video canvas
-        self.video_canvas = tk.Canvas(left_frame, bg='black', width=800, height=600)
-        self.video_canvas.pack(pady=10)
+        # Left side - Video display
+        left_frame = ttk.Frame(main_paned)
+        main_paned.add(left_frame, weight=3)  # Give more weight to video area
+        
+        # Video canvas with responsive sizing
+        video_frame = ttk.Frame(left_frame)
+        video_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        self.video_canvas = tk.Canvas(video_frame, bg='black', width=640, height=480)
+        self.video_canvas.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
         # Control buttons
         control_frame = ttk.Frame(left_frame)
@@ -113,17 +136,44 @@ class LicensePlateGUI:
         self.stop_btn = ttk.Button(control_frame, text="Stop", command=self.stop_capture)
         self.stop_btn.pack(side=tk.LEFT, padx=5)
         
-        # Status label
-        self.status_label = ttk.Label(left_frame, text="Status: Ready")
-        self.status_label.pack(pady=5)
+        # Status and FPS labels
+        status_frame = ttk.Frame(left_frame)
+        status_frame.pack(pady=5)
         
-        # FPS label
-        self.fps_label = ttk.Label(left_frame, text="FPS: 0")
+        self.status_label = ttk.Label(status_frame, text="Status: Ready")
+        self.status_label.pack()
+        
+        self.fps_label = ttk.Label(status_frame, text="FPS: 0")
         self.fps_label.pack()
         
-        # Right side - Detection panel and controls
-        right_frame = ttk.Frame(main_frame)
-        right_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=(10, 0))
+        # Right side - Scrollable control panel
+        right_main_frame = ttk.Frame(main_paned)
+        main_paned.add(right_main_frame, weight=1)  # Less weight for control panel
+        
+        # Create canvas and scrollbar for scrollable right panel
+        canvas = tk.Canvas(right_main_frame, highlightthickness=0)
+        scrollbar = ttk.Scrollbar(right_main_frame, orient="vertical", command=canvas.yview)
+        self.scrollable_frame = ttk.Frame(canvas)
+        
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Pack canvas and scrollbar
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Bind mousewheel to canvas
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        
+        # Now create all controls in the scrollable frame
+        right_frame = self.scrollable_frame
         
         # Configuration panel
         config_frame = ttk.LabelFrame(right_frame, text="Configuration", padding=10)
@@ -238,20 +288,21 @@ class LicensePlateGUI:
                                            foreground='green' if self.filter_settings['enabled'] else 'red')
         self.filter_status_label.pack()
         
-        # Saved detections panel
+        # Saved detections panel with better height management
         saved_frame = ttk.LabelFrame(right_frame, text="Saved License Plates", padding=10)
-        saved_frame.pack(fill=tk.BOTH, expand=True)
+        saved_frame.pack(fill=tk.X, pady=(0, 10))  # Changed from expand=True to fixed height
         
-        # Listbox with scrollbar
+        # Listbox with scrollbar and fixed height
         list_frame = ttk.Frame(saved_frame)
-        list_frame.pack(fill=tk.BOTH, expand=True)
+        list_frame.pack(fill=tk.X)
         
-        self.saved_listbox = tk.Listbox(list_frame, font=('Arial', 10))
-        scrollbar = ttk.Scrollbar(list_frame, orient=tk.VERTICAL, command=self.saved_listbox.yview)
-        self.saved_listbox.configure(yscrollcommand=scrollbar.set)
+        # Set a reasonable height for the listbox
+        self.saved_listbox = tk.Listbox(list_frame, font=('Arial', 10), height=8)  # Fixed height
+        scrollbar_list = ttk.Scrollbar(list_frame, orient=tk.VERTICAL, command=self.saved_listbox.yview)
+        self.saved_listbox.configure(yscrollcommand=scrollbar_list.set)
         
-        self.saved_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.saved_listbox.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        scrollbar_list.pack(side=tk.RIGHT, fill=tk.Y)
         
         # Buttons for saved detections
         button_frame = ttk.Frame(saved_frame)
@@ -265,6 +316,10 @@ class LicensePlateGUI:
         
         delete_btn = ttk.Button(button_frame, text="Delete Selected", command=self.delete_selected)
         delete_btn.pack(side=tk.LEFT, padx=5)
+        
+        # Add some bottom padding to ensure scrolling works well
+        bottom_spacer = ttk.Frame(right_frame, height=20)
+        bottom_spacer.pack()
 
     # ========================= NEW FILTER METHODS =========================
     def get_current_pattern(self):
@@ -654,21 +709,31 @@ class LicensePlateGUI:
         return True
     
     def display_frame(self, frame):
-        """Display frame in the canvas"""
+        """Display frame in the canvas with responsive sizing"""
         if frame is None:
             return
+        
+        # Update canvas to get current size
+        self.video_canvas.update_idletasks()
         
         # Resize frame to fit canvas
         height, width = frame.shape[:2]
         canvas_width = self.video_canvas.winfo_width()
         canvas_height = self.video_canvas.winfo_height()
         
-        if canvas_width > 1 and canvas_height > 1:
-            # Calculate scaling factor
-            scale = min(canvas_width/width, canvas_height/height)
-            new_width = int(width * scale)
-            new_height = int(height * scale)
+        # Ensure minimum canvas size
+        if canvas_width < 100:
+            canvas_width = 640
+        if canvas_height < 100:
+            canvas_height = 480
             
+        # Calculate scaling factor to maintain aspect ratio
+        scale = min(canvas_width/width, canvas_height/height, 1.0)  # Don't upscale
+        new_width = int(width * scale)
+        new_height = int(height * scale)
+        
+        # Only resize if dimensions are valid
+        if new_width > 0 and new_height > 0:
             frame_resized = cv2.resize(frame, (new_width, new_height))
             
             # Convert to RGB and then to ImageTk
@@ -676,7 +741,7 @@ class LicensePlateGUI:
             image = Image.fromarray(frame_rgb)
             photo = ImageTk.PhotoImage(image)
             
-            # Clear canvas and display new frame
+            # Clear canvas and display new frame centered
             self.video_canvas.delete("all")
             x = (canvas_width - new_width) // 2
             y = (canvas_height - new_height) // 2
@@ -742,15 +807,27 @@ def main():
     
     root.protocol("WM_DELETE_WINDOW", on_closing)
     
-    # Show initial message
-    messagebox.showinfo("Bengali License Plate Recognition", 
-                       "Enhanced GUI with Regex Filter\\n\\n" +
-                       "NEW FEATURES:\\n" +
-                       "• Pattern-based license plate validation\\n" +
-                       "• Multiple regex patterns supported\\n" +
-                       "• Filter testing functionality\\n" +
-                       "• Only valid formats are saved\\n\\n" +
-                       "Default: Only 'ChattoMetroGa 138707' format allowed")
+    # Show initial message (more compact for small screens)
+    screen_width = root.winfo_screenwidth()
+    if screen_width < 1200:  # Smaller screen
+        messagebox.showinfo("Bengali License Plate Recognition", 
+                           "Enhanced GUI with Regex Filter\\n\\n" +
+                           "NEW FEATURES:\\n" +
+                           "• Pattern validation\\n" +
+                           "• Multiple regex patterns\\n" +
+                           "• Filter testing\\n" +
+                           "• Valid format saving\\n\\n" +
+                           "Note: Use scroll wheel on right panel\\n" +
+                           "Default: 'ChattoMetroGa 138707' format")
+    else:  # Larger screen
+        messagebox.showinfo("Bengali License Plate Recognition", 
+                           "Enhanced GUI with Regex Filter\\n\\n" +
+                           "NEW FEATURES:\\n" +
+                           "• Pattern-based license plate validation\\n" +
+                           "• Multiple regex patterns supported\\n" +
+                           "• Filter testing functionality\\n" +
+                           "• Only valid formats are saved\\n\\n" +
+                           "Default: Only 'ChattoMetroGa 138707' format allowed")
     
     root.mainloop()
 
