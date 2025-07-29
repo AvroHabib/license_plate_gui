@@ -274,9 +274,25 @@ class LicensePlateGUI:
         current_frame = ttk.LabelFrame(right_frame, text="Current Detection", padding=10)
         current_frame.pack(fill=tk.X, pady=(0, 10))
         
-        self.current_detection_label = ttk.Label(current_frame, text="No detection", 
-                                               font=('Arial', 12, 'bold'))
-        self.current_detection_label.pack()
+        # Create frame for scrollable text widget
+        text_frame = ttk.Frame(current_frame)
+        text_frame.pack(fill=tk.X, pady=5)
+        
+        # Create horizontally scrollable text widget for license plate display
+        self.current_detection_text = tk.Text(text_frame, height=2, font=('Arial', 11, 'bold'),
+                                            wrap=tk.NONE, bg='white', fg='black',
+                                            state=tk.DISABLED, cursor='arrow')
+        
+        # Horizontal scrollbar for the text widget
+        h_scrollbar = ttk.Scrollbar(text_frame, orient=tk.HORIZONTAL, command=self.current_detection_text.xview)
+        self.current_detection_text.configure(xscrollcommand=h_scrollbar.set)
+        
+        # Pack text widget and scrollbar
+        self.current_detection_text.pack(side=tk.TOP, fill=tk.X)
+        h_scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
+        
+        # Initialize with default text
+        self.update_detection_display("No detection")
         
         self.detection_confidence_label = ttk.Label(current_frame, text="Confidence: --")
         self.detection_confidence_label.pack()
@@ -297,7 +313,7 @@ class LicensePlateGUI:
         list_frame.pack(fill=tk.X)
         
         # Set a reasonable height for the listbox
-        self.saved_listbox = tk.Listbox(list_frame, font=('Arial', 10), height=8)  # Fixed height
+        self.saved_listbox = tk.Listbox(list_frame, font=('Courier', 9), height=8)  # Courier font for better alignment
         scrollbar_list = ttk.Scrollbar(list_frame, orient=tk.VERTICAL, command=self.saved_listbox.yview)
         self.saved_listbox.configure(yscrollcommand=scrollbar_list.set)
         
@@ -322,6 +338,15 @@ class LicensePlateGUI:
         bottom_spacer.pack()
 
     # ========================= NEW FILTER METHODS =========================
+    def update_detection_display(self, text):
+        """Update the scrollable detection text widget"""
+        self.current_detection_text.config(state=tk.NORMAL)
+        self.current_detection_text.delete(1.0, tk.END)
+        self.current_detection_text.insert(1.0, text)
+        self.current_detection_text.config(state=tk.DISABLED)
+        # Reset horizontal scroll to beginning
+        self.current_detection_text.xview_moveto(0)
+    
     def get_current_pattern(self):
         """Get the current regex pattern"""
         pattern_type = self.filter_settings['pattern_type']
@@ -640,14 +665,14 @@ class LicensePlateGUI:
             
             # Update current detection display
             if current_detections:
-                self.current_detection_label.config(text=current_detections[0])
+                self.update_detection_display(current_detections[0])
                 self.detection_confidence_label.config(text="Active Detection")
                 
                 # Add to detection history for stability analysis
                 self.detection_history.append(current_detections[0])
                 self.check_stable_detection()
             else:
-                self.current_detection_label.config(text="No detection")
+                self.update_detection_display("No detection")
                 self.detection_confidence_label.config(text="--")
                 
         except Exception as e:
