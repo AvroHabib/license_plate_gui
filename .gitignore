@@ -18,6 +18,9 @@ coverage.xml
 *.cover
 *.log
 .git
+
+# RTSP configuration files (may contain sensitive credentials)
+rtsp_config.json
 .mypy_cache
 .pytest_cache
 .hypothesis

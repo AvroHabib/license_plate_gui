@@ -50,8 +50,6 @@ class LicensePlateRTSPGUI:
         
         # RTSP variables (NEW!)
         self.rtsp_url = ""
-        self.rtsp_username = ""
-        self.rtsp_password = ""
         self.current_source_type = "camera"  # "camera", "video", "rtsp"
         
         # Model variables
@@ -106,7 +104,11 @@ class LicensePlateRTSPGUI:
             100: 'Dha', 101: 'Ba'
         }
         
+        # Configuration file path
+        self.config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "rtsp_config.json")
+        
         self.create_widgets()
+        self.load_configuration()  # Load saved RTSP URL
         self.load_models()
         
     def create_widgets(self):
@@ -133,30 +135,18 @@ class LicensePlateRTSPGUI:
         control_frame = ttk.Frame(left_frame)
         control_frame.pack(pady=10)
         
-        # First row of buttons
-        control_row1 = ttk.Frame(control_frame)
-        control_row1.pack(pady=5)
-        
-        self.start_btn = ttk.Button(control_row1, text="Start Camera", command=self.start_camera)
+        self.start_btn = ttk.Button(control_frame, text="Start Camera", command=self.start_camera)
         self.start_btn.pack(side=tk.LEFT, padx=5)
         
-        self.load_video_btn = ttk.Button(control_row1, text="Load Video", command=self.load_video)
+        self.load_video_btn = ttk.Button(control_frame, text="Load Video", command=self.load_video)
         self.load_video_btn.pack(side=tk.LEFT, padx=5)
         
         # NEW RTSP BUTTON!
-        self.rtsp_btn = ttk.Button(control_row1, text="RTSP Stream", command=self.start_rtsp_stream)
+        self.rtsp_btn = ttk.Button(control_frame, text="RTSP Stream", command=self.start_rtsp_stream)
         self.rtsp_btn.pack(side=tk.LEFT, padx=5)
         
-        # Second row of buttons
-        control_row2 = ttk.Frame(control_frame)
-        control_row2.pack(pady=5)
-        
-        self.stop_btn = ttk.Button(control_row2, text="Stop", command=self.stop_capture)
+        self.stop_btn = ttk.Button(control_frame, text="Stop", command=self.stop_capture)
         self.stop_btn.pack(side=tk.LEFT, padx=5)
-        
-        # NEW RTSP CONFIG BUTTON!
-        self.rtsp_config_btn = ttk.Button(control_row2, text="RTSP Config", command=self.configure_rtsp)
-        self.rtsp_config_btn.pack(side=tk.LEFT, padx=5)
         
         # Status and FPS labels
         status_frame = ttk.Frame(left_frame)
@@ -208,39 +198,23 @@ class LicensePlateRTSPGUI:
         # RTSP URL
         ttk.Label(rtsp_frame, text="RTSP URL:").grid(row=0, column=0, sticky=tk.W, pady=2)
         self.rtsp_url_var = tk.StringVar(value="rtsp://")
-        rtsp_url_entry = ttk.Entry(rtsp_frame, textvariable=self.rtsp_url_var, width=30)
-        rtsp_url_entry.grid(row=0, column=1, columnspan=2, pady=2, padx=(5, 0), sticky=tk.W+tk.E)
+        self.rtsp_url_var.trace('w', self.on_rtsp_url_change)  # Auto-save when changed
+        rtsp_url_entry = ttk.Entry(rtsp_frame, textvariable=self.rtsp_url_var, width=40)
+        rtsp_url_entry.grid(row=0, column=1, pady=2, padx=(5, 0), sticky=tk.W+tk.E)
         
-        # Username (optional)
-        ttk.Label(rtsp_frame, text="Username:").grid(row=1, column=0, sticky=tk.W, pady=2)
-        self.rtsp_username_var = tk.StringVar()
-        username_entry = ttk.Entry(rtsp_frame, textvariable=self.rtsp_username_var, width=15)
-        username_entry.grid(row=1, column=1, pady=2, padx=(5, 0))
-        
-        # Password (optional)
-        ttk.Label(rtsp_frame, text="Password:").grid(row=1, column=2, sticky=tk.W, pady=2, padx=(10, 0))
-        self.rtsp_password_var = tk.StringVar()
-        password_entry = ttk.Entry(rtsp_frame, textvariable=self.rtsp_password_var, show="*", width=15)
-        password_entry.grid(row=1, column=3, pady=2, padx=(5, 0))
-        
-        # Quick presets
-        presets_frame = ttk.Frame(rtsp_frame)
-        presets_frame.grid(row=2, column=0, columnspan=4, pady=5, sticky=tk.W+tk.E)
-        
-        ttk.Label(presets_frame, text="Quick Presets:").pack(side=tk.LEFT)
-        ttk.Button(presets_frame, text="Local IP Cam", 
-                  command=lambda: self.rtsp_url_var.set("rtsp://192.168.1.100:554/stream")).pack(side=tk.LEFT, padx=5)
-        ttk.Button(presets_frame, text="Test Stream", 
-                  command=lambda: self.rtsp_url_var.set("rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4")).pack(side=tk.LEFT, padx=5)
+        # URL format help
+        help_label = ttk.Label(rtsp_frame, text="Format: rtsp://username:password@host:port/path", 
+                             font=('Arial', 8), foreground='gray')
+        help_label.grid(row=1, column=0, columnspan=2, pady=2, sticky=tk.W)
         
         # Test connection button
         test_rtsp_btn = ttk.Button(rtsp_frame, text="Test RTSP Connection", command=self.test_rtsp_connection)
-        test_rtsp_btn.grid(row=3, column=0, columnspan=4, pady=5)
+        test_rtsp_btn.grid(row=2, column=0, columnspan=2, pady=5)
         
         # Connection status
         self.rtsp_status_label = ttk.Label(rtsp_frame, text="RTSP Status: Not connected", 
                                          font=('Arial', 9), foreground='red')
-        self.rtsp_status_label.grid(row=4, column=0, columnspan=4, pady=2)
+        self.rtsp_status_label.grid(row=3, column=0, columnspan=2, pady=2)
         # ==========================================================================
         
         # Configuration panel
@@ -406,67 +380,6 @@ class LicensePlateRTSPGUI:
         bottom_spacer.pack()
 
     # ========================= NEW RTSP METHODS =========================
-    def configure_rtsp(self):
-        """Open RTSP configuration dialog"""
-        dialog = tk.Toplevel(self.root)
-        dialog.title("RTSP Configuration")
-        dialog.geometry("500x300")
-        dialog.resizable(False, False)
-        dialog.transient(self.root)
-        dialog.grab_set()
-        
-        # Center the dialog
-        dialog.update_idletasks()
-        x = (dialog.winfo_screenwidth() // 2) - (dialog.winfo_width() // 2)
-        y = (dialog.winfo_screenheight() // 2) - (dialog.winfo_height() // 2)
-        dialog.geometry(f"+{x}+{y}")
-        
-        main_frame = ttk.Frame(dialog, padding=20)
-        main_frame.pack(fill=tk.BOTH, expand=True)
-        
-        # RTSP URL
-        ttk.Label(main_frame, text="RTSP URL:", font=('Arial', 10, 'bold')).pack(anchor=tk.W, pady=(0, 5))
-        url_entry = ttk.Entry(main_frame, textvariable=self.rtsp_url_var, width=60)
-        url_entry.pack(fill=tk.X, pady=(0, 10))
-        
-        # Credentials frame
-        cred_frame = ttk.LabelFrame(main_frame, text="Authentication (Optional)", padding=10)
-        cred_frame.pack(fill=tk.X, pady=(0, 10))
-        
-        ttk.Label(cred_frame, text="Username:").grid(row=0, column=0, sticky=tk.W, pady=2)
-        username_entry = ttk.Entry(cred_frame, textvariable=self.rtsp_username_var, width=25)
-        username_entry.grid(row=0, column=1, pady=2, padx=(10, 0))
-        
-        ttk.Label(cred_frame, text="Password:").grid(row=1, column=0, sticky=tk.W, pady=2)
-        password_entry = ttk.Entry(cred_frame, textvariable=self.rtsp_password_var, show="*", width=25)
-        password_entry.grid(row=1, column=1, pady=2, padx=(10, 0))
-        
-        # Example URLs
-        examples_frame = ttk.LabelFrame(main_frame, text="Example URLs", padding=10)
-        examples_frame.pack(fill=tk.X, pady=(0, 10))
-        
-        examples = [
-            "rtsp://192.168.1.100:554/stream",
-            "rtsp://admin:password@192.168.1.100:554/cam/realmonitor?channel=1&subtype=0",
-            "rtsp://username:password@camera_ip:554/live",
-            "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4"
-        ]
-        
-        for i, example in enumerate(examples):
-            ttk.Button(examples_frame, text=f"Example {i+1}", 
-                      command=lambda url=example: self.rtsp_url_var.set(url)).pack(side=tk.LEFT, padx=2)
-        
-        # Buttons
-        button_frame = ttk.Frame(main_frame)
-        button_frame.pack(fill=tk.X, pady=(10, 0))
-        
-        ttk.Button(button_frame, text="Test Connection", 
-                  command=self.test_rtsp_connection).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(button_frame, text="Save & Close", 
-                  command=dialog.destroy).pack(side=tk.RIGHT, padx=(5, 0))
-        ttk.Button(button_frame, text="Cancel", 
-                  command=dialog.destroy).pack(side=tk.RIGHT)
-        
     def test_rtsp_connection(self):
         """Test RTSP connection"""
         rtsp_url = self.rtsp_url_var.get().strip()
@@ -502,18 +415,8 @@ class LicensePlateRTSPGUI:
             messagebox.showerror("Error", f"RTSP connection error: {str(e)}")
     
     def build_rtsp_url(self):
-        """Build RTSP URL with credentials"""
-        url = self.rtsp_url_var.get().strip()
-        username = self.rtsp_username_var.get().strip()
-        password = self.rtsp_password_var.get().strip()
-        
-        if username and password and "://" in url:
-            # Insert credentials into URL
-            protocol, rest = url.split("://", 1)
-            if "@" not in rest:  # Only add if not already present
-                url = f"{protocol}://{username}:{password}@{rest}"
-        
-        return url
+        """Get RTSP URL (credentials should be included in the URL)"""
+        return self.rtsp_url_var.get().strip()
     
     def start_rtsp_stream(self):
         """Start RTSP stream capture"""
@@ -554,6 +457,40 @@ class LicensePlateRTSPGUI:
             except Exception as e:
                 messagebox.showerror("Error", f"RTSP connection error: {str(e)}")
                 self.rtsp_status_label.config(text=f"RTSP Status: ❌ Error", foreground='red')
+    
+    # ========================= CONFIGURATION METHODS =========================
+    def load_configuration(self):
+        """Load saved RTSP configuration from file"""
+        try:
+            if os.path.exists(self.config_file):
+                with open(self.config_file, 'r') as f:
+                    config_data = json.load(f)
+                    saved_url = config_data.get('rtsp_url', 'rtsp://')
+                    if saved_url and saved_url != 'rtsp://':
+                        self.rtsp_url_var.set(saved_url)
+                        print(f"✅ Loaded saved RTSP URL: {saved_url}")
+        except Exception as e:
+            print(f"⚠️ Could not load RTSP configuration: {e}")
+    
+    def save_configuration(self):
+        """Save current RTSP configuration to file"""
+        try:
+            config_data = {
+                'rtsp_url': self.rtsp_url_var.get(),
+                'last_updated': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            with open(self.config_file, 'w') as f:
+                json.dump(config_data, f, indent=2)
+            print(f"✅ Saved RTSP configuration: {self.rtsp_url_var.get()}")
+        except Exception as e:
+            print(f"⚠️ Could not save RTSP configuration: {e}")
+    
+    def on_rtsp_url_change(self, *args):
+        """Called when RTSP URL changes - auto-save configuration"""
+        # Save configuration whenever URL changes
+        if hasattr(self, 'rtsp_url_var') and self.rtsp_url_var.get().strip():
+            self.save_configuration()
+    # =================================================================
     # =================================================================
 
     # ========================= FILTER METHODS =========================
@@ -1069,6 +1006,7 @@ class LicensePlateRTSPGUI:
     
     def __del__(self):
         """Cleanup when object is destroyed"""
+        self.save_configuration()  # Save config on exit
         if self.cap:
             self.cap.release()
 
@@ -1079,6 +1017,7 @@ def main():
     app = LicensePlateRTSPGUI(root)
     
     def on_closing():
+        app.save_configuration()  # Save config before closing
         app.stop_capture()
         root.destroy()
     
